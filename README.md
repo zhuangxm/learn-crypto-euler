@@ -1,7 +1,6 @@
 # crypto
 
-A Clojure library designed to ... well, that part is up to you.
-
+exercise for learning cryptograph and project euler.
 ## Usage
 
 FIXME
