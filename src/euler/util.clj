@@ -22,3 +22,12 @@
   "check if n is prime? n < 1,000,000,000,000"
   (or (prime-10000-set n)
       (every? #(not= 0 (mod n %)) prime-10000)))
+
+(defn nearest-sqrt
+  [n]
+  (int (Math/sqrt n)))
+
+(defn divied-by?
+  [n d]
+  (== 0 (mod n d)))
+
