@@ -27,6 +27,11 @@
   [n]
   (int (Math/sqrt n)))
 
+(defn can-sqrt?
+  [n]
+  (let [s (int (Math/sqrt n))]
+    (== n (* s s))))
+
 (defn divied-by?
   [n d]
   (== 0 (mod n d)))
