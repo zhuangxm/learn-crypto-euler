@@ -42,16 +42,6 @@
     (< n 0) 0
     :else (sum-up2 n v-cs)))
 
-(defn pn
-  [n]
-  (->> (range 0 (inc n))
-    (reduce (fn [cs v] (conj cs (pn- v cs))) [])
-    last))
-
-(defn pn-version2
-  [n]
-  (last (nth (pn-seq) n)))
-
 (defn pn-seq
   []
   (let [cs (volatile! [])]
@@ -63,6 +53,17 @@
            (vswap! cs conj n)
            [(inc index) n])))
      [0 1])))
+
+(defn pn
+  [n]
+  (->> (range 0 (inc n))
+    (reduce (fn [cs v] (conj cs (pn- v cs))) [])
+    last))
+
+(defn pn-version2
+  [n]
+  (last (nth (pn-seq) n)))
+
 
 (defn answer
   [divisor]
