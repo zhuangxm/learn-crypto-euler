@@ -30,6 +30,15 @@
                    (> l c1 0))))
     set))
 
+(defn neighbors-4-directions
+  "not allow left"
+  [l [r c]]
+  (->> [[(dec r) c] [(inc r) c] [r (dec c)] [r (inc c)]]
+    (filter (fn [[r1 c1]]
+              (and (> l r1 -1)
+                   (> l c1 -1))))
+    set))
+
 (defn open-neighbors
   [closed-sets neighbor-set]
   (difference neighbor-set closed-sets))
@@ -66,17 +75,31 @@
 (defn construct-path
   [scores current]
   #_(prn "construct-path: " scores )
+  #_(prn "current: " current)
   (loop [path [[current (first (scores current))]]]
     (let [from (second (scores (ffirst path)))]
+      #_(prn "path: " path "from: " from)
       (if-not from
         path
         (recur (cons [from (first (scores from))] path))))))
 
+(defn target-last-column
+  [[r c] target-column]
+  (== c target-column))
+
+(defn target-bottom-right
+   [[r c] target-column target-row]
+  (and (== c target-column)
+       (== r target-row)))
+
 (defn wide-search
-  "matrix like [[1 2 3] [4 5 6] [7 8 9]]"
-  [matrix & starts]
+  "matrix like [[1 2 3] [4 5 6] [7 8 9]]
+  options support {:fn-neighbors .. :fn-target ..}"
+  [matrix starts & [options]]
   (prn "start: " starts)
-  (let [l (count matrix)]
+  (let [l (count matrix)
+        fn-neighbors (get options :fn-neighbors neighbors)
+        fn-targe (get options :fn-target #(target-last-column % (dec l)))]
     (loop [open-set (set (or (seq starts) #{[0 0]}))
            close-set #{}
            scores  (into {} (map #(vector % [(node matrix %) nil]) starts))]
@@ -84,9 +107,9 @@
       #_(prn "close-set: " close-set)
       #_(prn "scrores: " scores)
       (let [current (select-current open-set scores)
-            n-s (open-neighbors close-set (neighbors l current))]
+            n-s (open-neighbors close-set (fn-neighbors l current))]
         #_(prn "n-s: " n-s)
-        (if (== (second current) (dec l))
+        (if (fn-targe current)
           (construct-path scores current)
           (recur (union (difference open-set #{current}) n-s)
             (conj close-set current)
@@ -103,9 +126,19 @@
  (let [l (count m)]
    (->> (range l)
      (map #(vector % 0))
-     (apply wide-search m)
+     (wide-search m)
      last
      last)))
+
+(defn answer-83
+  [m]
+  (let [l (count m)]
+    (->>
+      (wide-search m #{[0 0]}
+                   {:fn-target #(target-bottom-right % (dec l) (dec l))
+                    :fn-neighbors neighbors-4-directions})
+      last
+      last)))
 
 #_(answer (load-matrix))
 
@@ -113,3 +146,7 @@
 ;;no optimization time: 176,647ms
 ;;first column only go don't right 175,433 ms
 ;;put all first column into start point. 2,486 ms
+
+#_(answer-83 (load-matrix))
+
+;;425185
