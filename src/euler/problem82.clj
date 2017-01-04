@@ -27,7 +27,7 @@
   (->> [[(dec r) c] [(inc r) c] #_[r (dec c)] [r (inc c)]]
     (filter (fn [[r1 c1]]
               (and (> l r1 -1)
-                   (> l c1 -1))))
+                   (> l c1 0))))
     set))
 
 (defn open-neighbors
@@ -74,12 +74,12 @@
 
 (defn wide-search
   "matrix like [[1 2 3] [4 5 6] [7 8 9]]"
-  [matrix start]
-  (prn "start: " start)
+  [matrix & starts]
+  (prn "start: " starts)
   (let [l (count matrix)]
-    (loop [open-set #{start}
+    (loop [open-set (set (or (seq starts) #{[0 0]}))
            close-set #{}
-           scores {start [(node matrix start) nil]}]
+           scores  (into {} (map #(vector % [(node matrix %) nil]) starts))]
       #_(prn "open-set: " open-set)
       #_(prn "close-set: " close-set)
       #_(prn "scrores: " scores)
@@ -103,11 +103,13 @@
  (let [l (count m)]
    (->> (range l)
      (map #(vector % 0))
-     (map #(wide-search m %))
-     (map last)
-     (map last)
-     (apply min))))
+     (apply wide-search m)
+     last
+     last)))
 
 #_(answer (load-matrix))
 
-;;260324
+;;the answer is 260324
+;;no optimization time: 176,647ms
+;;first column only go don't right 175,433 ms
+;;put all first column into start point. 2,486 ms
