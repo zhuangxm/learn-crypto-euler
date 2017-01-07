@@ -68,7 +68,7 @@
 (defn answer
   [divisor]
   (->> (pn-seq)
-    (some (fn [[index v]] (when (divied-by? v divisor) index)))))
+    (some (fn [[index v]] (when (divided-by? v divisor) index)))))
 
 #_(answer 1000000)
 ;;TODO too slow show optimize

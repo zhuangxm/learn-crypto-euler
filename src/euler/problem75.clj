@@ -15,7 +15,7 @@
 (defn find-ks
   [n]
   (->> (range 1 (inc (nearest-sqrt n)))
-    (mapcat #(when (divied-by? n %) [% (/ n %)]))))
+    (mapcat #(when (divided-by? n %) [% (/ n %)]))))
 
 (defn find-n
   [p k m]

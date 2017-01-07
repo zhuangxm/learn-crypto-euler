@@ -32,7 +32,7 @@
   (let [s (int (Math/sqrt n))]
     (== n (* s s))))
 
-(defn divied-by?
+(defn divided-by?
   [n d]
   (== 0 (mod n d)))
 
