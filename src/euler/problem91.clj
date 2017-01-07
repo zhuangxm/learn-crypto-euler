@@ -24,3 +24,7 @@
     (->> (combo/combinations ps 2)
       (filter #(apply is-right-angled %))
       count)))
+
+#_(answer 50)
+
+;; 14234 11,489 ms
