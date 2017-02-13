@@ -1,6 +1,7 @@
 (ns euler.step2.problem108
   (:require [euler.problem95 :refer [factors]]
             [clojure.math.combinatorics :as combo]
+            [clojure.math.numeric-tower :as math]
             [euler.util :refer :all]))
 
 ;;http://www.cut-the-knot.org/arithmetic/ShortEquationInReciprocals.shtml#solution
@@ -32,20 +33,11 @@
       (map #(* %1 %2) count-seq)
       (apply +))))
 
-;; TODO this function is incorrect,
-;; it should have a simple method to get the solution count
 (defn solution-count
   [count-seq]
-  (let [c (apply + count-seq)]
-    (->> count-seq
-      (map inc)
-      (apply *)
-      (+ (apply * count-seq))
-      (+ (product-count count-seq))
-      (+ (- (/ (* c (dec c))
-               2)))
-      (+ (count count-seq))
-      (+ (- 4)))))
+  (reduce (fn [r v] (+ r (* v (dec (* 2 r)))))
+          (inc (first count-seq))
+          (rest count-seq)))
 
 ;;this is some kind of brute force method to get solution count
 (defn simulate-solution-count
@@ -71,29 +63,73 @@
 
 (defn calculate [primes count-seq]
   (->> count-seq
-    (map #(Math/pow %1 %2) primes)
+    (map #(math/expt (bigint %1) (bigint %2)) primes)
     (apply *)))
 
 (defn max-count
   [ask-count]
   (->> (iterate inc 1)
-    (map #(vector % (Math/pow 2 %)))
+    (map #(vector % (solution-count (repeat % 1))))
     (drop-while #(< (last %) ask-count))
     (ffirst)))
 
-(defn find-prims-count
+(defn find-primes-count
   [ask-count]
   (let [max-c (inc (max-count ask-count))]
     (->> max-c
       (range 1)
       (mapcat #(find-solution [%] max-c))
-      (map #(vector % (simulate-solution-count %)))
-      (filter seq)
+      (map #(vector % (solution-count %)))
       (filter #(> (last %) ask-count))
       (map (fn [[count-seq _]] (vector count-seq (calculate prime-10000 count-seq))))
       (sort-by last)
       first
       last)))
+
+(defn cumulate
+  [s primes]
+  (->> s
+    (map #(Math/pow %1 %2) primes)
+    (apply +)))
+
+
+(defn max-pow
+   "return max n that small-p ^ n < bigger-p"
+  [count-seq s limit primes ask-solution-count]
+  (let [upper-limit (when (seq s) (+ (last s) (nth count-seq (dec (count s)))))
+        upper-limit (or upper-limit limit)]
+    (->> (range 0 (inc upper-limit))
+      (map #(vector % (Math/pow (nth primes (count s)) %)))
+      (take-while #(<= (last %) limit))
+      (map #(conj s (first %)))
+      (mapcat #(max-pow count-seq % (- limit (cumulate % primes)) primes ask-solution-count))
+      (cons s))))
+
+(defn move-forward
+  [count-seq p primes ask-solution-count]
+  (max-pow count-seq [] p primes ask-solution-count))
+
+(defn smart-solution
+  [primes count-seq ask-solution-count]
+  (let [n (calculate primes count-seq)
+        last-count (last count-seq)
+        last-prime (nth primes (dec (count count-seq)))
+        new-count-seq (if (== 1 last-count)
+                        (drop-last count-seq)
+                        (concat (drop-last count-seq) [(dec last-count)]))]
+   (or
+    (->>
+     (move-forward count-seq last-prime primes ask-solution-count)
+     (rest)
+     (map #(concat % (repeat (- (count new-count-seq) (count %))
+                             0)))
+     (map #(map + % new-count-seq))
+     (filter #(>= (solution-count %) ask-solution-count))
+     (map #(vector % (calculate primes %)))
+     (filter #(<= (last %) n))
+     (sort-by last)
+     first)
+    [count-seq n])))
 
 (defn brute-force-combinations
   [n]
@@ -101,3 +137,21 @@
      (map #(vector % (/ % (dec (/ % n)))))
      (filter #(integer? (last %)))
      (map (fn [[y x]] [y x (/ y x)]))))
+
+(defn smart-answer
+  [ask-count]
+  (let [max-c (max-count ask-count)]
+    (loop [count-seq (repeat max-c 1)
+           n (calculate prime-10000 count-seq)]
+      (let [[new-count-seq new-n] (smart-solution prime-10000 count-seq ask-count)]
+         (prn ["smart-answer: " new-count-seq new-n])
+         (if (< new-n n)
+           (recur new-count-seq new-n)
+           [new-count-seq n])))))
+
+
+;;(find-primes-count 1000)
+;;180180
+
+;;(last (smart-answer 4000000))
+;;9350130049860600
