@@ -74,6 +74,3 @@
       first)))
 
 #_(amicable-chains prime-10000 1000000)
-
-
-
