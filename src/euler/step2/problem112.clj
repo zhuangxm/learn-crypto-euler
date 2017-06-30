@@ -1,6 +1,11 @@
 (ns euler.step2.problem112
  (:require [clojure.math.combinatorics :as combo]))
 
+;;every digital combinations only one or two non-bounty solutions.
+;;for example
+;; [3 5 3 4] only 5433 or 3345.
+;; [ 5 5 5 5] only 5555
+
 (defn cs
   [digits n]
   (let [s (mapcat #(repeat n %) digits)
