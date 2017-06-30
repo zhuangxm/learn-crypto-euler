@@ -19,7 +19,7 @@
 
 (defn prime?
   [n]
-  "check if n is prime? n < 1,000,000,000,000"
+  "check if n is prime? n < 100,000,000"
   (or (prime-10000-set n)
       (every? #(not= 0 (mod n %)) prime-10000)))
 
