@@ -14,6 +14,21 @@
         (conj ps (first col)))
       ps)))
 
+
+;; https://web.archive.org/web/20150710134640/http://diditwith.net/2009/01/20/YAPESProblemSevenPart2.aspx
+(defn lazy-primes
+  "Generates an infinite, lazy sequence of prime numbers"
+  []
+  (letfn [(reinsert [table x prime]
+                    (update-in table [(+ prime x)] conj prime))
+          (primes-step [table d]
+                       (if-let [factors (get table d)]
+                         (recur (reduce #(reinsert %1 d %2) (dissoc table d) factors)
+                           (inc d))
+                         (lazy-seq (cons d (primes-step (assoc table (* d d) (list d))
+                                                        (inc d))))))]
+    (primes-step {} 2)))
+
 (defonce prime-10000 (primes 10000))
 (defonce prime-10000-set (set prime-10000))
 
