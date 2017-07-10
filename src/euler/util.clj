@@ -32,12 +32,6 @@
 (defonce prime-10000 (primes 10000))
 (defonce prime-10000-set (set prime-10000))
 
-(defn prime?
-  [n]
-  "check if n is prime? n < 100,000,000"
-  (or (prime-10000-set n)
-      (every? #(not= 0 (mod n %)) prime-10000)))
-
 (defn nearest-sqrt
   [n]
   (int (Math/sqrt n)))
@@ -50,4 +44,12 @@
 (defn divided-by?
   [n d]
   (== 0 (mod n d)))
+
+(defn prime?
+  [n & [ps]]
+  "check if n is prime?"
+  (let [n-sqrt (inc (nearest-sqrt n))]
+     (->> (or ps (lazy-primes))
+          (take-while #(< % n-sqrt))
+          (every? #(not= 0 (mod n %))))))
 
