@@ -116,6 +116,10 @@
   [table col row num]
   (assoc-in table [row col] num))
 
+(defn solve?
+  [table]
+  (every? number? (apply concat table)))
+
 (defn brute-force
   [table]
   (let [[col row ps] (find-first-unsolved table)]
@@ -136,10 +140,6 @@
 (def s-file "resources/p096_sudoku.txt")
 
 #_(load-sudoku "resources/p096_sudoku.txt")
-
-(defn solve?
-  [table]
-  (every? number? (apply concat table)))
 
 (defn solve-all [file-name]
   (->> (load-sudoku file-name)
